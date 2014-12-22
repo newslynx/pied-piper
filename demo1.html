@@ -25,6 +25,8 @@
 
 	</div>
 	<script type="text/javascript" src="zip.js"></script>
+	<script type="text/javascript" src="js/thirdparty/underscore-min.js"></script>
+	<script type="text/javascript" src="js/thirdparty/d3.v3.min.js"></script>
 	<script>
 
 		// Cache some functions cross-browserly
@@ -32,38 +34,85 @@
 				URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
 				createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
 
-	  var json_data = [
-	  	{name: 'michael'},
-	  	{name: 'henry'}
-	  ];
+	  var in_data = {
+	  	student_one: [{name: 'michael'}],
+	  	student_two: [{name: 'henry'}]
+	  };
 
 		// creates a zip storing the file "lorem.txt" with blob as data
 		// the zip will be stored into a Blob object (zippedBlob)
-		zipMultiple(json_data, function(zippedBlob) {
+		zipMultiple(in_data, 'dict', 'csv', function(zippedBlob) {
 			var zipped_blog_href = createObjectURL(zippedBlob);
 			var DOM_download_btn = document.getElementById('download-button');
 			DOM_download_btn.href = zipped_blog_href;
 			DOM_download_btn.download = 'newslynx-data.zip';
 		});
 
-		function zipMultiple(files, cb) {
+		function zipMultiple(files, inputFormat, outputFormat, cb) {
 			var addIndex = 0,
 					writer = new zip.BlobWriter("application/zip"),
 					zipWriter;
 
-			function nextFile() {
-				var file = files[addIndex],
-				 		blob = new Blob([ JSON.stringify(file) ], { type : "text/plain" }),
-						blob_reader = new zip.BlobReader(blob);
+			// They need to be turned into an array of strings
+			files_reformatted = formatFiles(files, inputFormat, outputFormat);
 
-				zipWriter.add(addIndex.toString()+'-file.txt', blob_reader, function(){
+			function nextFile() {
+				var file = files_reformatted[addIndex],
+				 		blob = new Blob([ file.data ], { type : "text/plain" }),
+						blob_reader = new zip.BlobReader(blob),
+						filename = file.name || 'file-'+addIndex;
+
+				zipWriter.add(filename+'.'+outputFormat, blob_reader, function(){
 					addIndex++;
-					if (addIndex < files.length) {
+					if (addIndex < files_reformatted.length) {
 						nextFile();
 					} else {
 						zipWriter.close(cb);
 					}
 				});
+			}
+
+			function formatFiles(files, inputFormat, outputFormat){
+				// Deep copy this
+				// TODO, use jQuery extend if that's faster
+				var reformatted = JSON.parse(JSON.stringify(files)),
+						tmp = [];
+
+				// `inputFormat` can be `list` or `dict`
+				// If it's list we need to map it to having an object of the format below
+				// If it's a `dict` we need to convert that to a list-ish object, stashing the key as `<list_item>.name`
+				if (inputFormat == 'dict') {
+					_.each(reformatted, function(value, key, dict){
+						var obj = {};
+						obj.data = value;
+						obj.name = key;
+						tmp.push(obj);
+					});
+					reformatted = tmp;
+				} else if (inputFormat == 'list'){
+					reformatted.forEach(function(val, index){
+						var obj = {};
+						obj.data = val;
+						obj.name = 'file-'+index;
+					});
+				}
+
+				// `outputFormat` can be `txt` or `csv`
+				// It will return an object of the format {name: :string, data: :string}
+				// If it's text, stringify the value of data
+				if (outputFormat == 'txt'){
+					reformatted.forEach(function(val){
+						if (typeof val.data != 'string'){
+							val.data = JSON.stringify(val.data);
+						}
+					});
+				} else if (outputFormat == 'csv') {
+					reformatted.forEach(function(val){
+						val.data = d3.csv.format(val.data);
+					});
+				}
+
+				return reformatted;
 			}
 
 			zip.createWriter(writer, function(writer) {
