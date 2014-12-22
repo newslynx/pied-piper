@@ -25,11 +25,13 @@
 
 	</div>
 	<script type="text/javascript" src="zip.js"></script>
-	<script type="text/javascript" src="js/thirdparty/underscore-min.js"></script>
-	<script type="text/javascript" src="js/thirdparty/d3.v3.min.js"></script>
+	<!-- Used to loop over objects, convenience -->
+	<script type="text/javascript" src="js/thirdparty/underscore-min.js"></script> 
+	<!-- Converts array of objects into csv format, could also just be the dsv library -->
+	<script type="text/javascript" src="js/thirdparty/d3.v3.min.js"></script> 
 	<script>
 
-		// Cache some functions cross-browserly
+		// Cache the `createObjectURL` function cross-browserly
 		var WINDOW = window,
 				URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
 				createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
@@ -39,8 +41,6 @@
 	  	student_two: [{name: 'henry'}]
 	  };
 
-		// creates a zip storing the file "lorem.txt" with blob as data
-		// the zip will be stored into a Blob object (zippedBlob)
 		zipMultiple(in_data, 'dict', 'csv', function(zippedBlob) {
 			var zipped_blog_href = createObjectURL(zippedBlob);
 			var DOM_download_btn = document.getElementById('download-button');
@@ -48,6 +48,8 @@
 			DOM_download_btn.download = 'newslynx-data.zip';
 		});
 
+		// Take in a list of things or a dictionary and output a zip of those files
+		// Can convert them to `csv` if so desired
 		function zipMultiple(files, inputFormat, outputFormat, cb) {
 			var addIndex = 0,
 					writer = new zip.BlobWriter("application/zip"),
