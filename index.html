@@ -41,28 +41,35 @@
 	  	student_two: [{name: 'henry'}]
 	  };
 
+	  var key_crossover = {
+	  	student_one: 'Student one',
+	  	student_two: 'Student two'
+	  }
+
 		zipMultiple(in_data, 'dict', 'csv', function(zippedBlob) {
 			var zipped_blog_href = createObjectURL(zippedBlob);
 			var DOM_download_btn = document.getElementById('download-button');
 			DOM_download_btn.href = zipped_blog_href;
 			DOM_download_btn.download = 'newslynx-data.zip';
-		});
+		}, key_crossover);
 
 		// Take in a list of things or a dictionary and output a zip of those files
 		// Can convert them to `csv` if so desired
-		function zipMultiple(files, inputFormat, outputFormat, cb) {
+		function zipMultiple(files, inputFormat, outputFormat, cb, prettyKeys) {
 			var addIndex = 0,
 					writer = new zip.BlobWriter("application/zip"),
-					zipWriter;
+					zipWriter,
+					prettyKeys = prettyKeys || {}; // Set this to an empty object if undefined so we can use `prettyKeys[foo]]` later on and that will return `undefined` if we don't have a conversion for that or or no `prettyKeys` is set.
 
 			// They need to be turned into an array of strings
-			files_reformatted = formatFiles(files, inputFormat, outputFormat);
+			files_reformatted = formatFiles(files, inputFormat, outputFormat, prettyKeys);
 
 			function nextFile() {
 				var file = files_reformatted[addIndex],
-				 		blob = new Blob([ file.data ], { type : "text/plain" }),
+						type = (outputFormat == 'txt') ? 'text/plain' : 'text/csv',
+				 		blob = new Blob([ file.data ], { type : type }),
 						blob_reader = new zip.BlobReader(blob),
-						filename = file.name || 'file-'+addIndex;
+						filename = file.name || 'file-'+addIndex; // If it's a list, we don't have a name for each file
 
 				zipWriter.add(filename+'.'+outputFormat, blob_reader, function(){
 					addIndex++;
@@ -74,7 +81,7 @@
 				});
 			}
 
-			function formatFiles(files, inputFormat, outputFormat){
+			function formatFiles(files, inputFormat, outputFormat, prettyKeys){
 				// Deep copy this
 				// TODO, use jQuery extend if that's faster
 				var reformatted = JSON.parse(JSON.stringify(files)),
@@ -87,7 +94,7 @@
 					_.each(reformatted, function(value, key, dict){
 						var obj = {};
 						obj.data = value;
-						obj.name = key;
+						obj.name = prettyKeys[key] || key;
 						tmp.push(obj);
 					});
 					reformatted = tmp;
