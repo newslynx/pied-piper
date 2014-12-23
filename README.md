@@ -5,7 +5,38 @@ An implementation of [zip.js]() to take a variety of json data formats and turn 
 
 The code is commented but basically this script accepts both objects and lists through its one function `zipMultiple`.
 
-##### [View demo](http://newslynx.github.io/ykk)
+#### [View demo](http://newslynx.github.io/ykk)
+
+### Example configuration
+
+````js
+	// Some cross-browser cacheing of conversion functions
+	var WINDOW = window,
+			URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
+			createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
+
+	var in_data = {
+		fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
+		veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
+	};
+
+	var key_crossover = {
+		fruits: 'Fruit list',
+		veggies: 'Veggie list'
+	}
+
+	zipMultiple(in_data, 'csv', function(zippedBlob) {
+		var zipped_blog_href = createObjectURL(zippedBlob);
+		// Set the URl as the href of the download button
+		// This might not be a good solution for Safari
+		var DOM_download_btn = document.getElementById('download-button');
+		DOM_download_btn.href = zipped_blog_href;
+		// Set the name of the file to download
+		DOM_download_btn.download = 'newslynx-data.zip';
+	}, key_crossover);
+````
+
+
 
 #### *zipMultiple(files, outputFormat, callback[, prettyKeys])*
 
@@ -72,36 +103,9 @@ A string to determine how you want to write the data under `values`. It can be e
 
 ##### `callback`
 
-has the following signature `(zippedBlob)`. You'll want to run `createObjectURL` on it to return the zipped data in url format. See below for an example configuration
+has the following signature `(zippedBlob)`. You'll want to run `createObjectURL` on it to return the zipped data in url format. See above for an example configuration
 
 ##### `prettyKeys`
 
-If you don't want to use the direct keys as your file names, you can set up a crossover dictionary and pass that in as an optional fourth argument. See below.
-
-````js
-	// Some cross-browser cacheing of conversion functions
-	var WINDOW = window,
-			URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
-			createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
-
-	var in_data = {
-		fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
-		veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
-	};
-
-	var key_crossover = {
-		fruits: 'Fruit list',
-		veggies: 'Veggie list'
-	}
-
-	zipMultiple(in_data, 'csv', function(zippedBlob) {
-		var zipped_blog_href = createObjectURL(zippedBlob);
-		// Set the URl as the href of the download button
-		// This might not be a good solution for Safari
-		var DOM_download_btn = document.getElementById('download-button');
-		DOM_download_btn.href = zipped_blog_href;
-		// Set the name of the file to download
-		DOM_download_btn.download = 'newslynx-data.zip';
-	}, key_crossover);
-````
+If you don't want to use the direct keys as your file names, you can set up a crossover dictionary and pass that in as an optional fourth argument. See example configuration above.
 
