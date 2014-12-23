@@ -63,10 +63,6 @@
 	<script type="text/javascript" src="zip.js"></script>
 	<script type="text/javascript" src="src/ykk.js"></script>
 	<script>
-		// Cache the `createObjectURL` function cross-browserly
-		var WINDOW = window,
-				URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
-				createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
 
 	  var in_data = {
 			fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
@@ -76,14 +72,15 @@
 	  var key_crossover = {
 			fruits: 'Fruit list',
 			veggies: 'Veggie list'
-	  }
+	  };
 
-		zip.zipMultiple(in_data, 'csv', function(zippedBlob) {
-			var zipped_blog_href = createObjectURL(zippedBlob);
-			console.log(zipped_blog_href)
+		zip.zipMultiple(in_data, 'csv', function(zippedBlob, zippedBlobHref) {
+			console.log(zippedBlobHref)
 			var DOM_download_btn = document.getElementById('download-button');
-			DOM_download_btn.href = zipped_blog_href;
+			DOM_download_btn.href = zippedBlobHref;
 			DOM_download_btn.download = 'newslynx-data.zip';
-		}, key_crossover);	</script>
+		}, key_crossover);	
+		
+	</script>
 </body>
 </html>

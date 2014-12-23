@@ -3,7 +3,11 @@
 
 	// Take in a list of things or a dictionary and output a zip of those files
 	// Can convert them to `csv` if so desired
-	function zipMultiple(files, outputFormat, cb, prettyKeys) {
+	function zipMultiple(files, outputFormat, callback, prettyKeys) {
+		// Cache the `createObjectURL` function cross-browserly
+		var URL = obj.webkitURL || obj.mozURL || obj.URL,
+				createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
+
 		var addIndex = 0,
 				writer = new zip.BlobWriter("application/zip"),
 				zipWriter,
@@ -25,7 +29,10 @@
 				if (addIndex < files_reformatted.length) {
 					nextFile();
 				} else {
-					zipWriter.close(cb);
+					zipWriter.close(function(zippedBlob){
+						var zipped_blog_href = createObjectURL(zippedBlob);
+						callback(zippedBlob, zipped_blog_href);
+					});
 				}
 			});
 		}

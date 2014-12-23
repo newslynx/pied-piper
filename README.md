@@ -19,11 +19,6 @@ This plugin creates a new function on `zip` called `zipMultiple`. Below is an ex
 
 		<!-- js -->
 		<script>
-			// Some cross-browser cacheing of conversion functions
-			var WINDOW = window,
-					URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
-					createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
-
 			var in_data = {
 				fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
 				veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
@@ -34,12 +29,11 @@ This plugin creates a new function on `zip` called `zipMultiple`. Below is an ex
 				veggies: 'Veggie list'
 			};
 
-			zip.zipMultiple(in_data, 'csv', function(zippedBlob) {
-				var zipped_blog_href = createObjectURL(zippedBlob);
-				// Set the URl as the href of the download button
+			zip.zipMultiple(in_data, 'csv', function(zippedBlob, zippedBlobHref) {
+				// Set the URL as the href of the download button
 				// This might not be a good solution for Safari
 				var DOM_download_btn = document.getElementById('download-button');
-				DOM_download_btn.href = zipped_blog_href;
+				DOM_download_btn.href = zippedBlobHref;
 				// Set the name of the file to download
 				DOM_download_btn.download = 'newslynx-data.zip';
 			}, key_crossover);
@@ -114,7 +108,7 @@ A string to determine how you want to write the data under `values`. It can be e
 
 ##### `callback`
 
-has the following signature `(zippedBlob)`. You'll want to run `createObjectURL` on it to return the zipped data in url format. See above for an example configuration
+has the following signature `(zippedBlob, zippedBlobHref)`. You can set the `href` of your download button link to `zippedBlobHref`. If you want to do more stuff to the zipped blob, you have access to that as the first argument passed in. See above for an example configuration
 
 ##### `prettyKeys`
 
