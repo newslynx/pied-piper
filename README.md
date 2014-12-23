@@ -5,9 +5,11 @@ An implementation of [zip.js]() to take a variety of json data formats and turn 
 
 The code is commented but basically this script accepts both objects and lists through its one function `zipMultiple`.
 
-### *zipMultiple(files, outputFormat, callback[, prettyKeys])*
+##### [View demo](http://newslynx.github.io/ykk)
 
-#### `files`
+#### *zipMultiple(files, outputFormat, callback[, prettyKeys])*
+
+##### `files`
 
 Your data object. Its format can be: 
 
@@ -60,7 +62,7 @@ Will become:
 ]
 ````
 
-#### `outputFormat`
+##### `outputFormat`
 
 A string to determine how you want to write the data under `values`. It can be either `'txt'` or `'csv'`. 
 
@@ -68,11 +70,11 @@ A string to determine how you want to write the data under `values`. It can be e
 * `'csv'` will run `dsv.csv.format` and will only work if your `values` is an array of objects. The result will be a string in comma-separated values format. Check out the [dsv](https://github.com/mbostock/dsv) documentation for more info.
 
 
-#### `callback`
+##### `callback`
 
 has the following signature `(zippedBlob)`. You'll want to run `createObjectURL` on it to return the zipped data in url format. See below for an example configuration
 
-#### `prettyKeys`
+##### `prettyKeys`
 
 If you don't want to use the direct keys as your file names, you can set up a crossover dictionary and pass that in as an optional fourth argument. See below.
 
