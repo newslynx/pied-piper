@@ -11,9 +11,17 @@
 	a{
 		text-decoration: none;
 		color: #f0c;
+		font-weight: bold;
 	}
 	a:hover{
 		text-decoration: underline;
+	}
+	pre{
+		border-radius: 4px;
+		background-color: #eee;
+		display: inline-block;
+		padding: 8px 20px 8px 5px;
+		border: 1px solid #ccc;
 	}
 </style>
 </head>
@@ -22,25 +30,39 @@
 	<div id="container">
 
 		<div class="description">
-			A JavaScript library to zip and unzip files
+			A plugin for <a href="http://gildas-lormeau.github.io/zip.js/" target="_blank">zip.js</a> to zip and download multiple data objects. <a href="https://github.com/newslynx/ykk" target="_blank">View source</a> on GitHub.
 			<hr>
 		</div>
 		
 		<h2>Create a zip file demo</h2>
 		
-		<ol id="demo-container">
+		<ul id="demo-container">
 			<li>
 				<a id="download-button" href="#">Download</a>
 				<span class="form-label"> the zip file.</span>
 			</li>
-		</ol>
+			<li> Of this data...
+			</li>
+		</ul>
+
+		<pre>
+  var in_data = {
+  	fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
+  	veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
+  };
+
+  var key_crossover = {
+  	fruits: 'Fruit list',
+  	veggies: 'Veggie list'
+  };
+		</pre>
 
 	</div>
-	<script type="text/javascript" src="zip.js"></script>
 	<!-- Converts array of objects into csv format -->
 	<script type="text/javascript" src="js/thirdparty/dsv.min.js"></script> 
+	<script type="text/javascript" src="zip.js"></script>
+	<script type="text/javascript" src="src/ykk.js"></script>
 	<script>
-
 		// Cache the `createObjectURL` function cross-browserly
 		var WINDOW = window,
 				URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
@@ -56,111 +78,12 @@
 			veggies: 'Veggie list'
 	  }
 
-		zipMultiple(in_data, 'csv', function(zippedBlob) {
+		zip.zipMultiple(in_data, 'csv', function(zippedBlob) {
 			var zipped_blog_href = createObjectURL(zippedBlob);
+			console.log(zipped_blog_href)
 			var DOM_download_btn = document.getElementById('download-button');
 			DOM_download_btn.href = zipped_blog_href;
 			DOM_download_btn.download = 'newslynx-data.zip';
-		}, key_crossover);
-
-		// Take in a list of things or a dictionary and output a zip of those files
-		// Can convert them to `csv` if so desired
-		function zipMultiple(files, outputFormat, cb, prettyKeys) {
-			var addIndex = 0,
-					writer = new zip.BlobWriter("application/zip"),
-					zipWriter,
-					prettyKeys = prettyKeys || {}; // Set this to an empty object if undefined so we can use `prettyKeys[foo]]` later on and that will return `undefined` if we don't have a conversion for that or or no `prettyKeys` is set.
-
-			// They need to be turned into an array of strings
-			files_reformatted = formatFiles(files, outputFormat, prettyKeys);
-
-			function nextFile() {
-				var file = files_reformatted[addIndex],
-						type = (outputFormat == 'txt') ? 'text/plain' : 'text/csv',
-				 		blob = new Blob([ file.values ], { type : type }),
-						blob_reader = new zip.BlobReader(blob),
-						filename = file.key || 'file-'+addIndex; // If it's a list, we don't have a name for each file
-
-				zipWriter.add(filename+'.'+outputFormat, blob_reader, function(){
-					addIndex++;
-					if (addIndex < files_reformatted.length) {
-						nextFile();
-					} else {
-						zipWriter.close(cb);
-					}
-				});
-			}
-
-			function formatFiles(files, outputFormat, prettyKeys){
-				// Deep copy this
-				// TODO, use jQuery extend if that's faster
-				var reformatted = JSON.parse(JSON.stringify(files)),
-						tmp = [];
-
-				// If `files` is a we need to map it to having an object of the format below
-				// If it's a `dict` we need to convert that to a list-ish object, stashing the key as `<list_item>.key`
-				if (Array.isArray(reformatted)){
-					reformatted.forEach(function(val, index){
-						var obj = {};
-						obj.values = val;
-						obj.key = 'file-'+index;
-					});
-				} else if (typeof reformatted == 'object') {
-					for (var key in reformatted){
-						if (reformatted.hasOwnProperty(key)){
-							var obj = {},
-									value = reformatted[key];
-							obj.values = value;
-							obj.key = prettyKeys[key] || key;
-							tmp.push(obj);
-						}
-					}
-					reformatted = tmp;
-				}
-
-				// `outputFormat` can be `txt` or `csv`
-				// It will return an object of the format {key: :string, value: :string}
-				// If it's text, stringify the value of `values`
-				if (outputFormat == 'txt'){
-					reformatted.forEach(function(val){
-						if (typeof val.values != 'string'){
-							val.values = JSON.stringify(val.values);
-						}
-					});
-				} else if (outputFormat == 'csv') {
-					reformatted.forEach(function(val){
-						val.values = dsv.csv.format(val.values);
-					});
-				}
-
-				return reformatted;
-			}
-
-			zip.createWriter(writer, function(writer) {
-				zipWriter = writer;
-				nextFile();
-			}, reportError);
-
-		}
-
-		function reportError(message) {
-		  console.error(message);
-		}
-
-		// function unzipBlob(blob, callback) {
-		//   // use a zip.BlobReader object to read zipped data stored into blob variable
-		//   zip.createReader(new zip.BlobReader(blob), function(zipReader) {
-		//     // get entries from the zip file
-		//     zipReader.getEntries(function(entries) {
-		//       // get data from the first file
-		//       entries[0].getData(new zip.BlobWriter("text/plain"), function(data) {
-		//         // close the reader and calls callback function with uncompressed data as parameter
-		//         zipReader.close();
-		//         callback(data);
-		//       });
-		//     });
-		//   }, reportError);
-		// }
-	</script>
+		}, key_crossover);	</script>
 </body>
 </html>

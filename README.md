@@ -1,39 +1,50 @@
 ykk
 ===
 
-An implementation of [zip.js]() to take a variety of json data formats and turn them into a zipped archive of text or csv data.
-
-The code is commented but basically this script accepts both objects and lists through its one function `zipMultiple`.
+A plugin for [zip.js](http://gildas-lormeau.github.io/zip.js/) to take a variety of json data formats and turn them into a zipped archive of text or csv data.
 
 #### [View demo](http://newslynx.github.io/ykk)
 
+This plugin creates a new function on `zip` called `zipMultiple`. Below is an example usage a walkthrough of the options.
+
 ### Example configuration
 
-````js
-	// Some cross-browser cacheing of conversion functions
-	var WINDOW = window,
-			URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
-			createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
+````html
+	<!-- html -->
+	<body>
+		<a id="download-button">Download</a>
+		<script src="js/dsv.min.js"></script> <!-- You can load either dsv or the full d3 library -->
+		<script src="js/thirdparty/zip.js"></script>
+		<script src="js/ykk.js"></script>
 
-	var in_data = {
-		fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
-		veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
-	};
+		<!-- js -->
+		<script>
+			// Some cross-browser cacheing of conversion functions
+			var WINDOW = window,
+					URL = WINDOW.webkitURL || WINDOW.mozURL || WINDOW.URL,
+					createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
 
-	var key_crossover = {
-		fruits: 'Fruit list',
-		veggies: 'Veggie list'
-	}
+			var in_data = {
+				fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
+				veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
+			};
 
-	zipMultiple(in_data, 'csv', function(zippedBlob) {
-		var zipped_blog_href = createObjectURL(zippedBlob);
-		// Set the URl as the href of the download button
-		// This might not be a good solution for Safari
-		var DOM_download_btn = document.getElementById('download-button');
-		DOM_download_btn.href = zipped_blog_href;
-		// Set the name of the file to download
-		DOM_download_btn.download = 'newslynx-data.zip';
-	}, key_crossover);
+			var key_crossover = {
+				fruits: 'Fruit list',
+				veggies: 'Veggie list'
+			};
+
+			zip.zipMultiple(in_data, 'csv', function(zippedBlob) {
+				var zipped_blog_href = createObjectURL(zippedBlob);
+				// Set the URl as the href of the download button
+				// This might not be a good solution for Safari
+				var DOM_download_btn = document.getElementById('download-button');
+				DOM_download_btn.href = zipped_blog_href;
+				// Set the name of the file to download
+				DOM_download_btn.download = 'newslynx-data.zip';
+			}, key_crossover);
+		</script>
+	</body
 ````
 
 
