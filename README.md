@@ -10,35 +10,35 @@ This plugin creates a new function on `zip` called `zipMultiple`. Below is an ex
 ### Example configuration
 
 ````html
-	<!-- html -->
-	<body>
-		<a id="download-button">Download</a>
-		<script src="js/dsv.min.js"></script> <!-- You can load either dsv or the full d3 library -->
-		<script src="js/thirdparty/zip.js"></script>
-		<script src="js/ykk.js"></script>
+<!-- html -->
+<body>
+	<a id="download-button">Download</a>
+	<script src="js/dsv.min.js"></script> <!-- You can load either dsv or the full d3 library -->
+	<script src="js/thirdparty/zip.js"></script>
+	<script src="js/ykk.js"></script>
 
-		<!-- js -->
-		<script>
-			var in_data = {
-				fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
-				veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
-			};
+	<!-- js -->
+	<script>
+		var in_data = {
+			fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
+			veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccolli', nickname: 'lame kale'}]
+		};
 
-			var key_crossover = {
-				fruits: 'Fruit list',
-				veggies: 'Veggie list'
-			};
+		var key_crossover = {
+			fruits: 'Fruit list',
+			veggies: 'Veggie list'
+		};
 
-			zip.zipMultiple(in_data, 'csv', function(zippedBlob, zippedBlobHref) {
-				// Set the URL as the href of the download button
-				// This might not be a good solution for Safari
-				var DOM_download_btn = document.getElementById('download-button');
-				DOM_download_btn.href = zippedBlobHref;
-				// Set the name of the file to download
-				DOM_download_btn.download = 'newslynx-data.zip';
-			}, key_crossover);
-		</script>
-	</body
+		zip.zipMultiple(in_data, 'csv', function(zippedBlob, zippedBlobHref) {
+			// Set the URL as the href of the download button
+			// This might not be a good solution for Safari
+			var DOM_download_btn = document.getElementById('download-button');
+			DOM_download_btn.href = zippedBlobHref;
+			// Set the name of the file to download
+			DOM_download_btn.download = 'newslynx-data.zip';
+		}, key_crossover);
+	</script>
+</body
 ````
 
 
