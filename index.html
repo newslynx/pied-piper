@@ -3,7 +3,19 @@
 <head>
 <meta charset='utf-8'>
 <title>Create a zip file demo</title>
-<link rel="stylesheet" href="demo.css">
+
+<style>
+	body{
+		font-family: Helvetica, sans-serif;
+	}
+	a{
+		text-decoration: none;
+		color: #f0c;
+	}
+	a:hover{
+		text-decoration: underline;
+	}
+</style>
 </head>
 
 <body>
@@ -18,17 +30,15 @@
 		
 		<ol id="demo-container">
 			<li>
-				<span class="form-label">download the zip file</span>
 				<a id="download-button" href="#">Download</a>
+				<span class="form-label"> the zip file.</span>
 			</li>
 		</ol>
 
 	</div>
 	<script type="text/javascript" src="zip.js"></script>
-	<!-- Used to loop over objects, convenience -->
-	<script type="text/javascript" src="js/thirdparty/underscore-min.js"></script> 
-	<!-- Converts array of objects into csv format, could also just be the dsv library -->
-	<script type="text/javascript" src="js/thirdparty/d3.v3.min.js"></script> 
+	<!-- Converts array of objects into csv format -->
+	<script type="text/javascript" src="js/thirdparty/dsv.min.js"></script> 
 	<script>
 
 		// Cache the `createObjectURL` function cross-browserly
@@ -37,16 +47,16 @@
 				createObjectURL = URL.createObjectURL; // Convert a compressed blob object to a data URL
 
 	  var in_data = {
-	  	student_one: [{name: 'michael'}],
-	  	student_two: [{name: 'henry'}]
+			fruits:  [{color: 'red', kind: 'apple'},{color: 'yellow', kind: 'banana'}],
+			veggies: [{color: 'green', kind: 'kale'},{color: 'green', kind: 'broccoli', nickname: 'lame kale'}]
 	  };
 
 	  var key_crossover = {
-	  	student_one: 'Student one',
-	  	student_two: 'Student two'
+			fruits: 'Fruit list',
+			veggies: 'Veggie list'
 	  }
 
-		zipMultiple(in_data, 'dict', 'csv', function(zippedBlob) {
+		zipMultiple(in_data, 'csv', function(zippedBlob) {
 			var zipped_blog_href = createObjectURL(zippedBlob);
 			var DOM_download_btn = document.getElementById('download-button');
 			DOM_download_btn.href = zipped_blog_href;
@@ -55,21 +65,21 @@
 
 		// Take in a list of things or a dictionary and output a zip of those files
 		// Can convert them to `csv` if so desired
-		function zipMultiple(files, inputFormat, outputFormat, cb, prettyKeys) {
+		function zipMultiple(files, outputFormat, cb, prettyKeys) {
 			var addIndex = 0,
 					writer = new zip.BlobWriter("application/zip"),
 					zipWriter,
 					prettyKeys = prettyKeys || {}; // Set this to an empty object if undefined so we can use `prettyKeys[foo]]` later on and that will return `undefined` if we don't have a conversion for that or or no `prettyKeys` is set.
 
 			// They need to be turned into an array of strings
-			files_reformatted = formatFiles(files, inputFormat, outputFormat, prettyKeys);
+			files_reformatted = formatFiles(files, outputFormat, prettyKeys);
 
 			function nextFile() {
 				var file = files_reformatted[addIndex],
 						type = (outputFormat == 'txt') ? 'text/plain' : 'text/csv',
-				 		blob = new Blob([ file.data ], { type : type }),
+				 		blob = new Blob([ file.values ], { type : type }),
 						blob_reader = new zip.BlobReader(blob),
-						filename = file.name || 'file-'+addIndex; // If it's a list, we don't have a name for each file
+						filename = file.key || 'file-'+addIndex; // If it's a list, we don't have a name for each file
 
 				zipWriter.add(filename+'.'+outputFormat, blob_reader, function(){
 					addIndex++;
@@ -81,43 +91,45 @@
 				});
 			}
 
-			function formatFiles(files, inputFormat, outputFormat, prettyKeys){
+			function formatFiles(files, outputFormat, prettyKeys){
 				// Deep copy this
 				// TODO, use jQuery extend if that's faster
 				var reformatted = JSON.parse(JSON.stringify(files)),
 						tmp = [];
 
-				// `inputFormat` can be `list` or `dict`
-				// If it's list we need to map it to having an object of the format below
-				// If it's a `dict` we need to convert that to a list-ish object, stashing the key as `<list_item>.name`
-				if (inputFormat == 'dict') {
-					_.each(reformatted, function(value, key, dict){
-						var obj = {};
-						obj.data = value;
-						obj.name = prettyKeys[key] || key;
-						tmp.push(obj);
-					});
-					reformatted = tmp;
-				} else if (inputFormat == 'list'){
+				// If `files` is a we need to map it to having an object of the format below
+				// If it's a `dict` we need to convert that to a list-ish object, stashing the key as `<list_item>.key`
+				if (Array.isArray(reformatted)){
 					reformatted.forEach(function(val, index){
 						var obj = {};
-						obj.data = val;
-						obj.name = 'file-'+index;
+						obj.values = val;
+						obj.key = 'file-'+index;
 					});
+				} else if (typeof reformatted == 'object') {
+					for (var key in reformatted){
+						if (reformatted.hasOwnProperty(key)){
+							var obj = {},
+									value = reformatted[key];
+							obj.values = value;
+							obj.key = prettyKeys[key] || key;
+							tmp.push(obj);
+						}
+					}
+					reformatted = tmp;
 				}
 
 				// `outputFormat` can be `txt` or `csv`
-				// It will return an object of the format {name: :string, data: :string}
-				// If it's text, stringify the value of data
+				// It will return an object of the format {key: :string, value: :string}
+				// If it's text, stringify the value of `values`
 				if (outputFormat == 'txt'){
 					reformatted.forEach(function(val){
-						if (typeof val.data != 'string'){
-							val.data = JSON.stringify(val.data);
+						if (typeof val.values != 'string'){
+							val.values = JSON.stringify(val.values);
 						}
 					});
 				} else if (outputFormat == 'csv') {
 					reformatted.forEach(function(val){
-						val.data = d3.csv.format(val.data);
+						val.values = dsv.csv.format(val.values);
 					});
 				}
 
@@ -129,6 +141,10 @@
 				nextFile();
 			}, reportError);
 
+		}
+
+		function reportError(message) {
+		  console.error(message);
 		}
 
 		// function unzipBlob(blob, callback) {
@@ -145,10 +161,6 @@
 		//     });
 		//   }, reportError);
 		// }
-
-		function reportError(message) {
-		  console.error(message);
-		}
 	</script>
 </body>
 </html>
