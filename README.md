@@ -1,9 +1,9 @@
-Pied Piper
+YKK
 ===
 
 A plugin for [zip.js](http://gildas-lormeau.github.io/zip.js/) to take a variety of json data formats and turn them into a zipped archive of text or csv data.
 
-#### [View demo](http://newslynx.github.io/pied-piper)
+#### [View demo](http://newslynx.github.io/ykk)
 
 This plugin creates a new function on `zip` called `zipMultiple`. Below is an example usage a walkthrough of the options.
 
@@ -15,7 +15,7 @@ This plugin creates a new function on `zip` called `zipMultiple`. Below is an ex
 	<a id="download-button">Download</a>
 	<script src="js/dsv.min.js"></script> <!-- You can load either dsv or the full d3 library -->
 	<script src="js/thirdparty/zip.js"></script>
-	<script src="js/pied-piper.js"></script>
+	<script src="js/ykk.js"></script>
 
 	<!-- js -->
 	<script>
@@ -52,7 +52,7 @@ Your data object. Its format can be:
 * a list of either objects or strings
 * a dictionary whose keys are lists 
 
-Pied Piper will transform your data into an object of with a `key` and a `values` key. The `key` wil be the file name that's written out. For lists, the `key` be `'file-'+index`. For instance, this list:
+YKK will transform your data into an object of with a `key` and a `values` key. The `key` wil be the file name that's written out. For lists, the `key` be `'file-'+index`. For instance, this list:
 
 ````js
 var data = [
