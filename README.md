@@ -1,4 +1,4 @@
-YKK
+ykk
 ===
 
 A plugin for [zip.js](http://gildas-lormeau.github.io/zip.js/) to take a variety of json data formats and turn them into a zipped archive of text or csv data.
