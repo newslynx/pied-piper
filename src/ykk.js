@@ -1,5 +1,8 @@
 (function(obj){
 	'use-strict';
+	
+	var dsv = dsv || undefined;
+	var d3  = d3 || undefined;
 
 	// Take in a list of things or a dictionary and output a zip of those files
 	// Can convert them to `csv` if so desired
